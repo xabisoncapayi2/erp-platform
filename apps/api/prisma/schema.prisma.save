@@ -1,0 +1,272 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+model Tenant {
+  customers   Customer[]
+  salesOrders SalesOrder[]
+  invoices    Invoice[]
+  id          String       @id @default(uuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  suppliers          Supplier[]
+  products           Product[]
+  inventoryItems     InventoryItem[]
+  purchaseOrders     PurchaseOrder[]
+  inventoryMovements InventoryMovement[]
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchaseOrders PurchaseOrder[]
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+}
+
+model Product {
+  salesOrderLines SalesOrderLine[]
+  id              String           @id @default(uuid())
+  tenantId        String
+  sku             String
+  name            String
+  description     String?
+  unitCost        Decimal          @db.Decimal(12, 2)
+  unitPrice       Decimal          @db.Decimal(12, 2)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  inventoryItem InventoryItem?
+  poLines       PurchaseOrderLine[]
+  tenant        Tenant              @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, sku])
+  @@index([tenantId])
+}
+
+model InventoryItem {
+  id             String   @id @default(uuid())
+  tenantId       String
+  productId      String   @unique
+  quantityOnHand Int      @default(0)
+  reorderLevel   Int      @default(10)
+  updatedAt      DateTime @updatedAt
+
+  product   Product             @relation(fields: [productId], references: [id])
+  tenant    Tenant              @relation(fields: [tenantId], references: [id])
+  movements InventoryMovement[]
+
+  @@index([tenantId])
+}
+
+model InventoryMovement {
+  id              String         @id @default(uuid())
+  tenantId        String
+  inventoryItemId String
+  quantityChange  Int
+  reason          MovementReason
+  referenceId     String?
+  createdAt       DateTime       @default(now())
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([inventoryItemId])
+}
+
+enum MovementReason {
+  PURCHASE_RECEIPT
+  SALE
+  ADJUSTMENT
+  RETURN
+  PURCHASE_CANCELLATION_RETURN
+}
+
+model PurchaseOrder {
+  id          String              @id @default(uuid())
+  tenantId    String
+  supplierId  String
+  status      PurchaseOrderStatus @default(DRAFT)
+  orderedAt   DateTime?
+  receivedAt  DateTime?
+  createdById String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  supplier Supplier            @relation(fields: [supplierId], references: [id])
+  lines    PurchaseOrderLine[]
+  tenant   Tenant              @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([supplierId])
+}
+
+model PurchaseOrderLine {
+  id               String  @id @default(uuid())
+  purchaseOrderId  String
+  productId        String
+  quantityOrdered  Int
+  quantityReceived Int     @default(0)
+  unitCost         Decimal @db.Decimal(12, 2)
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  product       Product       @relation(fields: [productId], references: [id])
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SUBMITTED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum SalesOrderStatus {
+  DRAFT
+  CONFIRMED
+  FULFILLED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+  CANCELLED
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salesOrders SalesOrder[]
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+}
+
+model SalesOrder {
+  id          String           @id @default(uuid())
+  tenantId    String
+  customerId  String
+  status      SalesOrderStatus @default(DRAFT)
+  totalAmount Decimal          @default(0) @db.Decimal(12, 2)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  customer Customer         @relation(fields: [customerId], references: [id])
+  lines    SalesOrderLine[]
+  invoice  Invoice?
+  tenant   Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([customerId])
+}
+
+model SalesOrderLine {
+  id           String  @id @default(uuid())
+  salesOrderId String
+  productId    String
+  quantity     Int
+  unitPrice    Decimal @db.Decimal(12, 2)
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
+  product    Product    @relation(fields: [productId], references: [id])
+
+  @@index([salesOrderId])
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  tenantId      String
+  salesOrderId  String        @unique
+  invoiceNumber String        @unique
+  totalAmount   Decimal       @db.Decimal(12, 2)
+  status        InvoiceStatus @default(UNPAID)
+  issuedAt      DateTime      @default(now())
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+}
+
+model Employee {
+  id             String         @id @default(uuid())
+  tenantId       String
+  firstName      String
+  lastName       String
+  email          String         @unique
+  idNumber       String
+  employmentType EmploymentType @default(FULL_TIME)
+  grossSalary    Decimal        @db.Decimal(12, 2)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  leaveRequests  LeaveRequest[]
+  paySlips       PaySlip[]
+}
+
+model LeaveRequest {
+  id         String      @id @default(uuid())
+  tenantId   String
+  employeeId String
+  startDate  DateTime
+  endDate    DateTime
+  days       Int
+  status     LeaveStatus @default(PENDING)
+  reason     String?
+  createdAt  DateTime    @default(now())
+
+  employee   Employee    @relation(fields: [employeeId], references: [id])
+}
+
+model PaySlip {
+  id          String   @id @default(uuid())
+  tenantId    String
+  employeeId  String
+  period      String
+  grossSalary Decimal  @db.Decimal(12, 2)
+  payeTax     Decimal  @db.Decimal(12, 2)
+  uifEmployee Decimal  @db.Decimal(12, 2)
+  uifEmployer Decimal  @db.Decimal(12, 2)
+  netSalary   Decimal  @db.Decimal(12, 2)
+  createdAt   DateTime @default(now())
+
+  employee    Employee @relation(fields: [employeeId], references: [id]
+}

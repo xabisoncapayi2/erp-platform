@@ -1,0 +1,145 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id                 String              @id @default(uuid())
+  name               String
+  slug               String              @unique
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  users              User[]
+  products           Product[]
+  suppliers          Supplier[]
+  purchaseOrders     PurchaseOrder[]
+  inventoryItems     InventoryItem[]
+  inventoryMovements InventoryMovement[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String
+  password  String
+  firstName String
+  lastName  String
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email, tenantId])
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id          String  @id @default(uuid())
+  action      String
+  description String?
+  roles       Role[]
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SUBMITTED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum MovementReason {
+  PURCHASE_RECEIPT
+  STOCK_ADJUSTMENT
+  DAMAGED_GOODS
+  SALES_SHIPMENT
+}
+
+model Product {
+  id          String              @id @default(uuid())
+  sku         String
+  name        String
+  description String?
+  price       Float
+  tenantId    String
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  poLines     PurchaseOrderLine[]
+  inventory   InventoryItem?
+  movements   InventoryMovement[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([sku, tenantId])
+}
+
+model Supplier {
+  id             String          @id @default(uuid())
+  name           String
+  contactName    String?
+  email          String?
+  phone          String?
+  tenantId       String
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  purchaseOrders PurchaseOrder[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model PurchaseOrder {
+  id         String              @id @default(uuid())
+  poNumber   String
+  status     PurchaseOrderStatus @default(DRAFT)
+  tenantId   String
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  supplierId String
+  supplier   Supplier            @relation(fields: [supplierId], references: [id])
+  lines      PurchaseOrderLine[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@unique([poNumber, tenantId])
+}
+
+model PurchaseOrderLine {
+  id               String        @id @default(uuid())
+  purchaseOrderId  String
+  purchaseOrder    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product       @relation(fields: [productId], references: [id])
+  quantityOrdered  Int
+  quantityReceived Int           @default(0)
+  unitPrice        Float
+}
+
+model InventoryItem {
+  id             String   @id @default(uuid())
+  productId      String   @unique
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  quantityOnHand Int      @default(0)
+  updatedAt      DateTime @updatedAt
+}
+
+model InventoryMovement {
+  id          String         @id @default(uuid())
+  productId   String
+  product     Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  quantity    Int
+  reason      MovementReason
+  referenceId String?
+  createdAt   DateTime       @default(now())
+}
