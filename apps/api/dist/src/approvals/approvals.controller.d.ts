@@ -5,13 +5,13 @@ export declare class ApprovalsController {
     private approvalsService;
     constructor(approvalsService: ApprovalsService);
     getPending(user: AuthenticatedUser, role: string): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
-        status: import(".prisma/client").$Enums.ApprovalStatus;
-        reason: string | null;
+        tenantId: string;
         entityType: import(".prisma/client").$Enums.ApprovableEntity;
         entityId: string;
+        status: import(".prisma/client").$Enums.ApprovalStatus;
+        reason: string | null;
         requestedById: string;
         approverRoleRequired: string;
         decidedById: string | null;
@@ -24,13 +24,13 @@ export declare class ApprovalsController {
         approverRoleRequired: string;
         reason?: string;
     }): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
-        status: import(".prisma/client").$Enums.ApprovalStatus;
-        reason: string | null;
+        tenantId: string;
         entityType: import(".prisma/client").$Enums.ApprovableEntity;
         entityId: string;
+        status: import(".prisma/client").$Enums.ApprovalStatus;
+        reason: string | null;
         requestedById: string;
         approverRoleRequired: string;
         decidedById: string | null;
@@ -41,13 +41,13 @@ export declare class ApprovalsController {
         decision: 'APPROVED' | 'REJECTED';
         note?: string;
     }): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
-        status: import(".prisma/client").$Enums.ApprovalStatus;
-        reason: string | null;
+        tenantId: string;
         entityType: import(".prisma/client").$Enums.ApprovableEntity;
         entityId: string;
+        status: import(".prisma/client").$Enums.ApprovalStatus;
+        reason: string | null;
         requestedById: string;
         approverRoleRequired: string;
         decidedById: string | null;

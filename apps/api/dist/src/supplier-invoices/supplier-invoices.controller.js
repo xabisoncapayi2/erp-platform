@@ -16,50 +16,47 @@ exports.SupplierInvoicesController = void 0;
 const common_1 = require("@nestjs/common");
 const supplier_invoices_service_1 = require("./supplier-invoices.service");
 let SupplierInvoicesController = class SupplierInvoicesController {
-    constructor(supplierInvoicesService) {
-        this.supplierInvoicesService = supplierInvoicesService;
+    constructor(service) {
+        this.service = service;
     }
-    create(tenantId, dto) {
-        return this.supplierInvoicesService.create(tenantId, {
-            ...dto,
-            dueDate: new Date(dto.dueDate),
-        });
+    async create(tenantHeader, dto) {
+        return this.service.create((tenantHeader || "default-tenant"), dto);
     }
-    approve(tenantId, id) {
-        return this.supplierInvoicesService.approve(id, tenantId);
+    async approve(invoiceId, tenantHeader) {
+        return this.service.approve(invoiceId, (tenantHeader || "default-tenant"));
     }
-    reject(tenantId, id, body) {
-        return this.supplierInvoicesService.reject(id, tenantId, body.reason);
+    async reject(invoiceId, tenantHeader, reason) {
+        return this.service.reject(invoiceId, (tenantHeader || "default-tenant"), reason);
     }
 };
 exports.SupplierInvoicesController = SupplierInvoicesController;
 __decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Headers)('x-tenant-id')),
+    (0, common_1.Post)("create"),
+    __param(0, (0, common_1.Headers)("x-tenant-id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], SupplierInvoicesController.prototype, "create", null);
 __decorate([
-    (0, common_1.Post)(':id/approve'),
-    __param(0, (0, common_1.Headers)('x-tenant-id')),
-    __param(1, (0, common_1.Param)('id')),
+    (0, common_1.Get)("approve"),
+    __param(0, (0, common_1.Query)("invoiceId")),
+    __param(1, (0, common_1.Headers)("x-tenant-id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], SupplierInvoicesController.prototype, "approve", null);
 __decorate([
-    (0, common_1.Post)(':id/reject'),
-    __param(0, (0, common_1.Headers)('x-tenant-id')),
-    __param(1, (0, common_1.Param)('id')),
-    __param(2, (0, common_1.Body)()),
+    (0, common_1.Get)("reject"),
+    __param(0, (0, common_1.Query)("invoiceId")),
+    __param(1, (0, common_1.Headers)("x-tenant-id")),
+    __param(2, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], SupplierInvoicesController.prototype, "reject", null);
 exports.SupplierInvoicesController = SupplierInvoicesController = __decorate([
-    (0, common_1.Controller)('supplier-invoices'),
+    (0, common_1.Controller)("supplier-invoices"),
     __metadata("design:paramtypes", [supplier_invoices_service_1.SupplierInvoicesService])
 ], SupplierInvoicesController);
 //# sourceMappingURL=supplier-invoices.controller.js.map

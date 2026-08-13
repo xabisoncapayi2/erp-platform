@@ -9,21 +9,21 @@ export declare class CustomersService {
     private prisma;
     constructor(prisma: PrismaService);
     create(tenantId: string, dto: CreateCustomerDto): Promise<{
-        tenantId: string;
-        name: string;
         id: string;
+        name: string;
         email: string;
+        tenantId: string;
     }>;
     findAll(tenantId: string): Promise<{
-        tenantId: string;
-        name: string;
         id: string;
+        name: string;
         email: string;
+        tenantId: string;
     }[]>;
     findOne(id: string, tenantId: string): Promise<{
-        tenantId: string;
-        name: string;
         id: string;
+        name: string;
         email: string;
+        tenantId: string;
     }>;
 }

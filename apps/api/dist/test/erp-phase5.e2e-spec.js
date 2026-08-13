@@ -89,8 +89,7 @@ describe('Phase 5: Supplier Invoices (Three-Way Matching) & General Ledger', () 
         });
     });
     afterAll(async () => {
-        await cleanupTestData();
-        await app.close();
+        await app?.close();
     });
     describe('Three-way matching', () => {
         it('accepts an invoice for exactly the ordered quantity at the agreed price', async () => {

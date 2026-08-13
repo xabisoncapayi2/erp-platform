@@ -3,12 +3,12 @@ export declare class PurchaseOrdersService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(data: any): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;
@@ -24,24 +24,24 @@ export declare class PurchaseOrdersService {
             purchaseOrderId: string;
         }[];
     } & {
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;
         receivedAt: Date | null;
     }>;
     updateStatus(id: string, status: any): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;
@@ -57,12 +57,12 @@ export declare class PurchaseOrdersService {
             purchaseOrderId: string;
         }[];
     } & {
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;
@@ -83,12 +83,12 @@ export declare class PurchaseOrdersService {
             purchaseOrderId: string;
         }[];
     } & {
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;

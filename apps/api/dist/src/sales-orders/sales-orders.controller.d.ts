@@ -11,13 +11,13 @@ export declare class SalesOrdersController {
             salesOrderId: string;
         }[];
     } & {
-        tenantId: string;
         id: string;
         createdAt: Date;
-        status: import(".prisma/client").$Enums.SalesOrderStatus;
-        customerId: string;
+        tenantId: string;
         warehouseId: string;
+        status: import(".prisma/client").$Enums.SalesOrderStatus;
         fulfilledAt: Date | null;
+        customerId: string;
     }>;
     fulfill(tenantId: string, id: string): Promise<{
         order: {
@@ -29,13 +29,13 @@ export declare class SalesOrdersController {
                 salesOrderId: string;
             }[];
         } & {
-            tenantId: string;
             id: string;
             createdAt: Date;
-            status: import(".prisma/client").$Enums.SalesOrderStatus;
-            customerId: string;
+            tenantId: string;
             warehouseId: string;
+            status: import(".prisma/client").$Enums.SalesOrderStatus;
             fulfilledAt: Date | null;
+            customerId: string;
         };
         totalRevenue: number;
         totalCost: number;

@@ -1,32 +1,22 @@
-import { Body, Controller, Headers, Param, Post } from '@nestjs/common';
-import { SupplierInvoicesService, CreateSupplierInvoiceDto } from './supplier-invoices.service';
+import { Controller, Get, Post, Body, Query, Param, Headers } from "@nestjs/common";
+import { SupplierInvoicesService } from "./supplier-invoices.service";
 
-@Controller('supplier-invoices')
+@Controller("supplier-invoices")
 export class SupplierInvoicesController {
-  constructor(private supplierInvoicesService: SupplierInvoicesService) {}
+  constructor(private readonly service: SupplierInvoicesService) {}
 
-  @Post()
-  create(
-    @Headers('x-tenant-id') tenantId: string,
-    @Body() dto: Omit<CreateSupplierInvoiceDto, 'dueDate'> & { dueDate: string },
-  ) {
-    return this.supplierInvoicesService.create(tenantId, {
-      ...dto,
-      dueDate: new Date(dto.dueDate),
-    });
+  @Post("create")
+  async create(@Headers("x-tenant-id") tenantHeader?: string, @Body() dto?: any) {
+    return this.service.create((tenantHeader || "default-tenant"), dto);
   }
 
-  @Post(':id/approve')
-  approve(@Headers('x-tenant-id') tenantId: string, @Param('id') id: string) {
-    return this.supplierInvoicesService.approve(id, tenantId);
+  @Get("approve")
+  async approve(@Query("invoiceId") invoiceId?: string, @Headers("x-tenant-id") tenantHeader?: string) {
+    return this.service.approve(invoiceId, (tenantHeader || "default-tenant"));
   }
 
-  @Post(':id/reject')
-  reject(
-    @Headers('x-tenant-id') tenantId: string,
-    @Param('id') id: string,
-    @Body() body: { reason: string },
-  ) {
-    return this.supplierInvoicesService.reject(id, tenantId, body.reason);
+  @Get("reject")
+  async reject(@Query("invoiceId") invoiceId?: string, @Headers("x-tenant-id") tenantHeader?: string, @Query() reason?: any) {
+    return this.service.reject(invoiceId, (tenantHeader || "default-tenant"), reason);
   }
 }

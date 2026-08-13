@@ -1,0 +1,82 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var NotificationsGateway_1;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NotificationsGateway = void 0;
+const websockets_1 = require("@nestjs/websockets");
+const socket_io_1 = require("socket.io");
+const common_1 = require("@nestjs/common");
+const event_bus_service_1 = require("../events/event-bus.service");
+let NotificationsGateway = NotificationsGateway_1 = class NotificationsGateway {
+    constructor(eventBus) {
+        this.eventBus = eventBus;
+        this.logger = new common_1.Logger(NotificationsGateway_1.name);
+    }
+    onModuleInit() {
+        this.eventBus.ofType().subscribe((evt) => {
+            const tenantRoom = `tenant:${evt.tenantId}`;
+            this.server.to(tenantRoom).emit("system_event", evt);
+            this.server.to(tenantRoom).emit(evt.name, evt.payload);
+            if (evt.payload && evt.payload.userId) {
+                const userRoom = `user:${evt.payload.userId}`;
+                this.server.to(userRoom).emit("user_notification", evt);
+            }
+            this.logger.log(`[WS Broadcast] Event: ${evt.name} -> Room: ${tenantRoom}`);
+        });
+    }
+    handleConnection(client) {
+        const tenantId = client.handshake.query.tenantId || "default-tenant";
+        const userId = client.handshake.query.userId || "system";
+        client.join(`tenant:${tenantId}`);
+        client.join(`user:${userId}`);
+        this.logger.log(`[WS Client Connected] ID: ${client.id} (Tenant: ${tenantId}, User: ${userId})`);
+        client.emit("connected", {
+            status: "online",
+            socketId: client.id,
+            tenantId,
+            userId,
+            timestamp: new Date().toISOString(),
+        });
+    }
+    handleDisconnect(client) {
+        this.logger.log(`[WS Client Disconnected] ID: ${client.id}`);
+    }
+    handlePing(client, data) {
+        return { event: "pong", data: { ...data, serverTime: new Date().toISOString() } };
+    }
+};
+exports.NotificationsGateway = NotificationsGateway;
+__decorate([
+    (0, websockets_1.WebSocketServer)(),
+    __metadata("design:type", socket_io_1.Server)
+], NotificationsGateway.prototype, "server", void 0);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("ping"),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], NotificationsGateway.prototype, "handlePing", null);
+exports.NotificationsGateway = NotificationsGateway = NotificationsGateway_1 = __decorate([
+    (0, websockets_1.WebSocketGateway)({
+        cors: {
+            origin: "*",
+        },
+        namespace: "/ws/notifications",
+    }),
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [event_bus_service_1.EventBusService])
+], NotificationsGateway);
+//# sourceMappingURL=notifications.gateway.js.map

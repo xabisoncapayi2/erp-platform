@@ -92,8 +92,7 @@ describe('Full chain: Supplier -> PO -> Warehouse -> Inventory -> Customer Order
         customerId = customer.id;
     });
     afterAll(async () => {
-        await cleanupTestData();
-        await app.close();
+        await app?.close();
     });
     it('Step 1: receives 20 units into Warehouse A via a real PO', async () => {
         const po = await prisma.purchaseOrder.create({

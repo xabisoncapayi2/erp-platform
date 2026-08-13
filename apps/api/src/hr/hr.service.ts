@@ -1,89 +1,63 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { LeaveStatus } from '@prisma/client';
-
-export interface CreateLeaveRequestDto {
-  employeeId: string;
-  leaveType: string;
-  startDate: string;
-  endDate: string;
-  daysRequested: number;
-}
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class HrService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  calculateAccruedLeave(startDate: Date): number {
-    const now = new Date();
-    const monthsWorked =
-      (now.getFullYear() - startDate.getFullYear()) * 12 +
-      (now.getMonth() - startDate.getMonth());
-
-    return Math.max(0, Math.floor(monthsWorked * 1.25));
-  }
-
-  async requestLeave(tenantId: string, dto: CreateLeaveRequestDto) {
-    const employee = await this.prisma.employee.findFirst({
-      where: { id: dto.employeeId, tenantId },
-    });
-
-    if (!employee) {
-      throw new NotFoundException(`Employee ${dto.employeeId} not found`);
-    }
-
-    return this.prisma.leaveRequest.create({
+  async createEmployee(tenantId: string, dto: any) {
+    return this.prisma.employee.create({
       data: {
         tenantId,
-        employeeId: dto.employeeId,
-        leaveType: dto.leaveType,
-        startDate: new Date(dto.startDate),
-        endDate: new Date(dto.endDate),
-        daysRequested: dto.daysRequested,
-        status: LeaveStatus.PENDING,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        email: dto.email,
+        department: dto.department,
+        position: dto.position,
+        salary: Number(dto.salary),
+        status: dto.status || "ACTIVE",
       },
     });
   }
 
-  async processLeaveApproval(
-    tenantId: string,
-    leaveRequestId: string,
-    approved: boolean,
-    approverId: string,
-  ) {
-    const leaveRequest = await this.prisma.leaveRequest.findFirst({
-      where: { id: leaveRequestId, tenantId },
-      include: { employee: true },
+  async getEmployees(tenantId: string) {
+    return this.prisma.employee.findMany({
+      where: { tenantId },
+      include: { payrolls: true },
     });
+  }
 
-    if (!leaveRequest) {
-      throw new NotFoundException(`Leave request ${leaveRequestId} not found`);
-    }
+  async getEmployeeById(tenantId: string, id: string) {
+    const emp = await this.prisma.employee.findFirst({
+      where: { id, tenantId },
+      include: { payrolls: true },
+    });
+    if (!emp) throw new NotFoundException(`Employee with ID ${id} not found`);
+    return emp;
+  }
 
-    if (leaveRequest.status !== LeaveStatus.PENDING) {
-      throw new BadRequestException(`Leave request is already processed`);
-    }
+  async processPayroll(tenantId: string, dto: any) {
+    const gross = Number(dto.grossPay);
+    const deductions = Number(dto.deductions || 0);
+    const netPay = gross - deductions;
 
-    const newStatus = approved ? LeaveStatus.APPROVED : LeaveStatus.REJECTED;
+    return this.prisma.payrollRecord.create({
+      data: {
+        tenantId,
+        employeeId: dto.employeeId,
+        payPeriod: dto.payPeriod,
+        grossPay: gross,
+        deductions,
+        netPay,
+        status: dto.status || "PROCESSED",
+      },
+    });
+  }
 
-    return this.prisma.$transaction(async (tx) => {
-      if (approved) {
-        await tx.employee.update({
-          where: { id: leaveRequest.employeeId },
-          data: {
-            leaveBalance: { decrement: leaveRequest.daysRequested },
-          },
-        });
-      }
-
-      return tx.leaveRequest.update({
-        where: { id: leaveRequestId },
-        data: {
-          status: newStatus,
-          approvedById: approverId,
-          processedAt: new Date(),
-        },
-      });
+  async getPayrollRecords(tenantId: string) {
+    return this.prisma.payrollRecord.findMany({
+      where: { tenantId },
+      include: { employee: true },
     });
   }
 }

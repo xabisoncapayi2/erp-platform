@@ -25,14 +25,14 @@ export declare class SupplierInvoicesService {
             id: string;
             unitPrice: import("@prisma/client-runtime-utils").Decimal;
             quantity: number;
-            total: import("@prisma/client-runtime-utils").Decimal;
             purchaseOrderLineId: string;
+            total: import("@prisma/client-runtime-utils").Decimal;
             supplierInvoiceId: string;
         }[];
     } & {
-        tenantId: string;
         id: string;
         createdAt: Date;
+        tenantId: string;
         status: import(".prisma/client").$Enums.SupplierInvoiceStatus;
         supplierId: string;
         purchaseOrderId: string;
@@ -43,9 +43,9 @@ export declare class SupplierInvoicesService {
         dueDate: Date;
     }>;
     approve(invoiceId: string, tenantId: string): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
+        tenantId: string;
         status: import(".prisma/client").$Enums.SupplierInvoiceStatus;
         supplierId: string;
         purchaseOrderId: string;
@@ -56,9 +56,9 @@ export declare class SupplierInvoicesService {
         dueDate: Date;
     }>;
     reject(invoiceId: string, tenantId: string, reason: string): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
+        tenantId: string;
         status: import(".prisma/client").$Enums.SupplierInvoiceStatus;
         supplierId: string;
         purchaseOrderId: string;

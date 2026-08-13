@@ -9,14 +9,14 @@ export declare class StockTransfersService {
     private prisma;
     constructor(prisma: PrismaService);
     transfer(tenantId: string, dto: CreateTransferDto): Promise<{
-        tenantId: string;
         productId: string;
         id: string;
         createdAt: Date;
+        tenantId: string;
         status: import(".prisma/client").$Enums.StockTransferStatus;
+        quantity: number;
         sourceWarehouseId: string;
         destWarehouseId: string;
-        quantity: number;
         completedAt: Date | null;
     }>;
 }

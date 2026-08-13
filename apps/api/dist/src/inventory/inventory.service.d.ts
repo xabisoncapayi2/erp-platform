@@ -4,53 +4,55 @@ export declare class InventoryService {
     constructor(prisma: PrismaService);
     findAll(tenantId: string): Promise<({
         product: {
-            tenantId: string;
-            name: string;
             id: string;
+            name: string;
+            tenantId: string;
             sku: string;
             unitCost: import("@prisma/client-runtime-utils").Decimal;
             unitPrice: import("@prisma/client-runtime-utils").Decimal;
         };
     } & {
-        tenantId: string;
         productId: string;
         id: string;
+        tenantId: string;
         warehouseId: string;
+        reorderLevel: number;
         quantityOnHand: number;
     })[]>;
     getInventory(tenantId: string): Promise<({
         product: {
-            tenantId: string;
-            name: string;
             id: string;
+            name: string;
+            tenantId: string;
             sku: string;
             unitCost: import("@prisma/client-runtime-utils").Decimal;
             unitPrice: import("@prisma/client-runtime-utils").Decimal;
         };
     } & {
-        tenantId: string;
         productId: string;
         id: string;
+        tenantId: string;
         warehouseId: string;
+        reorderLevel: number;
         quantityOnHand: number;
     })[]>;
     getStockLevel(tenantId: string, productId: string): Promise<number>;
     getMovements(tenantId: string, productId: string): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
-        quantityChange: number;
+        tenantId: string;
         reason: import(".prisma/client").$Enums.MovementReason;
-        referenceId: string | null;
         inventoryItemId: string;
+        quantityChange: number;
+        referenceId: string | null;
     }[]>;
     getMovementsForProduct(productId: string, tenantId: string): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
-        quantityChange: number;
+        tenantId: string;
         reason: import(".prisma/client").$Enums.MovementReason;
-        referenceId: string | null;
         inventoryItemId: string;
+        quantityChange: number;
+        referenceId: string | null;
     }[]>;
 }

@@ -149,6 +149,7 @@ model Product {
 }
 
 model InventoryItem {
+  reorderLevel Int @default(10)
   id             String              @id @default(uuid())
   tenantId       String
   productId      String
@@ -335,13 +336,20 @@ enum LeaveStatus {
 }
 
 model Employee {
+  status String? @default("ACTIVE")
+  grossSalary Float?
+  salary Float?
+  payrolls PayrollRecord[]
+  paySlips PaySlip[]
+  employmentType EmploymentType? @default(FULL_TIME)
+  position String?
   id            String         @id @default(uuid())
   tenantId      String
   firstName     String
   lastName      String
   email         String
-  department    String
-  jobTitle      String
+  department String?
+  jobTitle String?
   leaveBalance  Float          @default(21)
   leaveRequests LeaveRequest[]
   createdAt     DateTime       @default(now())
@@ -351,12 +359,20 @@ model Employee {
 
 
 model AuditLog {
+  userAgent String?
+  ipAddress String?
+  details Json?
+  entityId   String?
+  afterData  Json?
+  beforeData Json?
+  actorId   String?
+  userEmail String?
   id        String   @id @default(uuid())
   tenantId  String
   userId    String?
   action    String
   entity    String
-  payload   Json
+  payload Json?
   createdAt DateTime @default(now())
 
   @@index([tenantId])
@@ -367,20 +383,99 @@ model AuditLog {
 
 
 model LeaveRequest {
+  reason String?
   id            String      @id @default(uuid())
   tenantId      String
   employeeId    String
   employee      Employee    @relation(fields: [employeeId], references: [id])
-  leaveType     String
+  leaveType String?
   startDate     DateTime
   endDate       DateTime
-  daysRequested Int
+  daysRequested Int?
   status        LeaveStatus @default(PENDING)
   approvedById  String?
   processedAt   DateTime?
   createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  updatedAt DateTime?    @updatedAt
 
   @@index([tenantId])
   @@index([employeeId])
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXECUTE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  TEMPORARY
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+  LOW_STOCK
+  SYSTEM
+}
+
+model PayrollRecord {
+  status String? @default("PROCESSED")
+  netPay Float?
+  deductions Float?
+  grossPay Float?
+  payPeriod String?
+  id          String   @id @default(uuid())
+  tenantId    String
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  period String?
+  grossAmount Float?
+  netAmount Float?
+  taxAmount Float?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model PaySlip {
+  uifEmployer Float?
+  uifEmployee Float?
+  tax Float?
+  id           String   @id @default(uuid())
+  tenantId     String
+  employeeId   String
+  employee     Employee @relation(fields: [employeeId], references: [id])
+  period       String
+  grossSalary Float?
+  netSalary Float?
+  payeTax Float?
+  uifDeduction Float?
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String?
+  title     String
+  message   String
+  type      String?  @default("INFO")
+  read      Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
 }

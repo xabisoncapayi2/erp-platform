@@ -1,41 +1,136 @@
-import { PrismaService } from '../prisma/prisma.service';
-export interface CreateLeaveRequestDto {
-    employeeId: string;
-    leaveType: string;
-    startDate: string;
-    endDate: string;
-    daysRequested: number;
-}
+import { PrismaService } from "../prisma/prisma.service";
 export declare class HrService {
-    private prisma;
+    private readonly prisma;
     constructor(prisma: PrismaService);
-    calculateAccruedLeave(startDate: Date): number;
-    requestLeave(tenantId: string, dto: CreateLeaveRequestDto): Promise<{
-        tenantId: string;
+    createEmployee(tenantId: string, dto: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.LeaveStatus;
-        leaveType: string;
-        startDate: Date;
-        endDate: Date;
-        daysRequested: number;
-        approvedById: string | null;
-        processedAt: Date | null;
-        employeeId: string;
-    }>;
-    processLeaveApproval(tenantId: string, leaveRequestId: string, approved: boolean, approverId: string): Promise<{
+        email: string;
         tenantId: string;
+        status: string | null;
+        grossSalary: number | null;
+        salary: number | null;
+        employmentType: import(".prisma/client").$Enums.EmploymentType | null;
+        position: string | null;
+        firstName: string;
+        lastName: string;
+        department: string | null;
+        jobTitle: string | null;
+        leaveBalance: number;
+    }>;
+    getEmployees(tenantId: string): Promise<({
+        payrolls: {
+            id: string;
+            createdAt: Date;
+            tenantId: string;
+            status: string | null;
+            employeeId: string;
+            netPay: number | null;
+            deductions: number | null;
+            grossPay: number | null;
+            payPeriod: string | null;
+            period: string | null;
+            grossAmount: number | null;
+            netAmount: number | null;
+            taxAmount: number | null;
+        }[];
+    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.LeaveStatus;
-        leaveType: string;
-        startDate: Date;
-        endDate: Date;
-        daysRequested: number;
-        approvedById: string | null;
-        processedAt: Date | null;
-        employeeId: string;
+        email: string;
+        tenantId: string;
+        status: string | null;
+        grossSalary: number | null;
+        salary: number | null;
+        employmentType: import(".prisma/client").$Enums.EmploymentType | null;
+        position: string | null;
+        firstName: string;
+        lastName: string;
+        department: string | null;
+        jobTitle: string | null;
+        leaveBalance: number;
+    })[]>;
+    getEmployeeById(tenantId: string, id: string): Promise<{
+        payrolls: {
+            id: string;
+            createdAt: Date;
+            tenantId: string;
+            status: string | null;
+            employeeId: string;
+            netPay: number | null;
+            deductions: number | null;
+            grossPay: number | null;
+            payPeriod: string | null;
+            period: string | null;
+            grossAmount: number | null;
+            netAmount: number | null;
+            taxAmount: number | null;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
+        tenantId: string;
+        status: string | null;
+        grossSalary: number | null;
+        salary: number | null;
+        employmentType: import(".prisma/client").$Enums.EmploymentType | null;
+        position: string | null;
+        firstName: string;
+        lastName: string;
+        department: string | null;
+        jobTitle: string | null;
+        leaveBalance: number;
     }>;
+    processPayroll(tenantId: string, dto: any): Promise<{
+        id: string;
+        createdAt: Date;
+        tenantId: string;
+        status: string | null;
+        employeeId: string;
+        netPay: number | null;
+        deductions: number | null;
+        grossPay: number | null;
+        payPeriod: string | null;
+        period: string | null;
+        grossAmount: number | null;
+        netAmount: number | null;
+        taxAmount: number | null;
+    }>;
+    getPayrollRecords(tenantId: string): Promise<({
+        employee: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            tenantId: string;
+            status: string | null;
+            grossSalary: number | null;
+            salary: number | null;
+            employmentType: import(".prisma/client").$Enums.EmploymentType | null;
+            position: string | null;
+            firstName: string;
+            lastName: string;
+            department: string | null;
+            jobTitle: string | null;
+            leaveBalance: number;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        tenantId: string;
+        status: string | null;
+        employeeId: string;
+        netPay: number | null;
+        deductions: number | null;
+        grossPay: number | null;
+        payPeriod: string | null;
+        period: string | null;
+        grossAmount: number | null;
+        netAmount: number | null;
+        taxAmount: number | null;
+    })[]>;
 }

@@ -12,12 +12,12 @@ export declare class PurchaseOrdersController {
             unitPrice: number;
         }>;
     }): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;
@@ -33,12 +33,12 @@ export declare class PurchaseOrdersController {
             purchaseOrderId: string;
         }[];
     } & {
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;
@@ -47,12 +47,12 @@ export declare class PurchaseOrdersController {
     updateStatus(id: string, body: {
         status: 'APPROVED' | 'REJECTED' | 'FULFILLED';
     }): Promise<{
-        tenantId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
+        tenantId: string;
         warehouseId: string | null;
+        status: import(".prisma/client").$Enums.PurchaseOrderStatus;
         supplierId: string;
         createdById: string | null;
         orderedAt: Date | null;

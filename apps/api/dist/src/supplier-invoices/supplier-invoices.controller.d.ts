@@ -1,23 +1,21 @@
-import { SupplierInvoicesService, CreateSupplierInvoiceDto } from './supplier-invoices.service';
+import { SupplierInvoicesService } from "./supplier-invoices.service";
 export declare class SupplierInvoicesController {
-    private supplierInvoicesService;
-    constructor(supplierInvoicesService: SupplierInvoicesService);
-    create(tenantId: string, dto: Omit<CreateSupplierInvoiceDto, 'dueDate'> & {
-        dueDate: string;
-    }): Promise<{
+    private readonly service;
+    constructor(service: SupplierInvoicesService);
+    create(tenantHeader?: string, dto?: any): Promise<{
         lines: {
             productId: string;
             id: string;
             unitPrice: import("@prisma/client-runtime-utils").Decimal;
             quantity: number;
-            total: import("@prisma/client-runtime-utils").Decimal;
             purchaseOrderLineId: string;
+            total: import("@prisma/client-runtime-utils").Decimal;
             supplierInvoiceId: string;
         }[];
     } & {
-        tenantId: string;
         id: string;
         createdAt: Date;
+        tenantId: string;
         status: import(".prisma/client").$Enums.SupplierInvoiceStatus;
         supplierId: string;
         purchaseOrderId: string;
@@ -27,10 +25,10 @@ export declare class SupplierInvoicesController {
         grandTotal: import("@prisma/client-runtime-utils").Decimal;
         dueDate: Date;
     }>;
-    approve(tenantId: string, id: string): Promise<{
-        tenantId: string;
+    approve(invoiceId?: string, tenantHeader?: string): Promise<{
         id: string;
         createdAt: Date;
+        tenantId: string;
         status: import(".prisma/client").$Enums.SupplierInvoiceStatus;
         supplierId: string;
         purchaseOrderId: string;
@@ -40,12 +38,10 @@ export declare class SupplierInvoicesController {
         grandTotal: import("@prisma/client-runtime-utils").Decimal;
         dueDate: Date;
     }>;
-    reject(tenantId: string, id: string, body: {
-        reason: string;
-    }): Promise<{
-        tenantId: string;
+    reject(invoiceId?: string, tenantHeader?: string, reason?: any): Promise<{
         id: string;
         createdAt: Date;
+        tenantId: string;
         status: import(".prisma/client").$Enums.SupplierInvoiceStatus;
         supplierId: string;
         purchaseOrderId: string;
