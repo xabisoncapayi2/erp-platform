@@ -20,16 +20,16 @@ let AnalyticsController = class AnalyticsController {
         this.service = service;
     }
     async getDashboardMetrics(tenantHeader) {
-        return this.service.getDashboardMetrics((tenantHeader || "default-tenant"));
+        return this.service.getDashboardMetrics(tenantHeader || "default-tenant");
     }
     async getMonthlySales(tenantHeader, year, month) {
-        return this.service.getMonthlySales((tenantHeader || "default-tenant"), year, month);
+        return this.service.getMonthlySales(tenantHeader || "default-tenant", year, month);
     }
-    async getTopSellingProducts(tenantHeader) {
-        return this.service.getTopSellingProducts((tenantHeader || "default-tenant"));
+    async getTopSellingProducts(tenantHeader, limit) {
+        return this.service.getTopSellingProducts(tenantHeader || "default-tenant", limit ? Number(limit) : 5);
     }
     async getInventoryValuationByWarehouse(tenantHeader) {
-        return this.service.getInventoryValuationByWarehouse((tenantHeader || "default-tenant"));
+        return this.service.getInventoryValuationByWarehouse(tenantHeader || "default-tenant");
     }
 };
 exports.AnalyticsController = AnalyticsController;
@@ -43,17 +43,18 @@ __decorate([
 __decorate([
     (0, common_1.Get)("getMonthlySales"),
     __param(0, (0, common_1.Headers)("x-tenant-id")),
-    __param(1, (0, common_1.Query)()),
-    __param(2, (0, common_1.Query)()),
+    __param(1, (0, common_1.Query)("year")),
+    __param(2, (0, common_1.Query)("month")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], AnalyticsController.prototype, "getMonthlySales", null);
 __decorate([
     (0, common_1.Get)("getTopSellingProducts"),
     __param(0, (0, common_1.Headers)("x-tenant-id")),
+    __param(1, (0, common_1.Query)("limit")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], AnalyticsController.prototype, "getTopSellingProducts", null);
 __decorate([

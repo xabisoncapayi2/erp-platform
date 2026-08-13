@@ -15,6 +15,9 @@ export declare class DashboardService {
             invoiceCount: number;
             topProducts: {
                 productId: string;
+                productName: string;
+                sku: string;
+                totalQuantity: number;
                 totalQuantitySold: number;
                 totalRevenue: number;
             }[];
@@ -23,6 +26,10 @@ export declare class DashboardService {
             totalValue: number;
             byWarehouse: {
                 warehouseId: string;
+                warehouseName: string;
+                itemCount: number;
+                totalQuantity: number;
+                totalValuation: number;
                 totalValue: number;
             }[];
             lowStockAlertCount: number;
@@ -31,11 +38,11 @@ export declare class DashboardService {
             pendingCount: number;
             pending: {
                 id: string;
-                createdAt: Date;
                 tenantId: string;
+                status: import(".prisma/client").$Enums.ApprovalStatus;
+                createdAt: Date;
                 entityType: import(".prisma/client").$Enums.ApprovableEntity;
                 entityId: string;
-                status: import(".prisma/client").$Enums.ApprovalStatus;
                 reason: string | null;
                 requestedById: string;
                 approverRoleRequired: string;
