@@ -1,41 +1,45 @@
-import { Controller, Get, Post, Body, Query, Param, Headers } from "@nestjs/common";
-import { HrService } from "./hr.service";
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { HrService, CreateEmployeeDto } from './hr.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../common/guards/tenant.guard';
+import { CurrentTenant } from '../common/decorators/current-tenant.decorator';
 
-@Controller("hr")
+@Controller('hr')
+@UseGuards(JwtAuthGuard, TenantGuard)
 export class HrController {
-  constructor(private readonly service: HrService) {}
+  constructor(private readonly hrService: HrService) {}
 
-  @Post("employees")
+  @Post('employees')
   async createEmployee(
-    @Headers("x-tenant-id") tenantHeader?: string,
-    @Body() dto?: any,
+    @CurrentTenant() tenantId: string,
+    @Body() dto: CreateEmployeeDto,
   ) {
-    return this.service.createEmployee(tenantHeader || "default-tenant", dto || {});
+    return this.hrService.createEmployee(tenantId, dto);
   }
 
-  @Get("employees")
-  async getEmployees(@Headers("x-tenant-id") tenantHeader?: string) {
-    return this.service.getEmployees(tenantHeader || "default-tenant");
+  @Get('employees')
+  async getEmployees(@CurrentTenant() tenantId: string) {
+    return this.hrService.getEmployees(tenantId);
   }
 
-  @Get("employees/:id")
+  @Get('employees/:id')
   async getEmployeeById(
-    @Headers("x-tenant-id") tenantHeader?: string,
-    @Param("id") id?: string,
+    @CurrentTenant() tenantId: string,
+    @Param('id') id: string,
   ) {
-    return this.service.getEmployeeById(tenantHeader || "default-tenant", id || "");
+    return this.hrService.getEmployeeById(tenantId, id);
   }
 
-  @Post("payroll")
+  @Post('payroll/process')
   async processPayroll(
-    @Headers("x-tenant-id") tenantHeader?: string,
-    @Body() dto?: any,
+    @CurrentTenant() tenantId: string,
+    @Body() dto: { employeeId: string; period: string },
   ) {
-    return this.service.processPayroll(tenantHeader || "default-tenant", dto || {});
+    return this.hrService.processPayroll(tenantId, dto);
   }
 
-  @Get("payroll")
-  async getPayrollRecords(@Headers("x-tenant-id") tenantHeader?: string) {
-    return this.service.getPayrollRecords(tenantHeader || "default-tenant");
+  @Get('payroll')
+  async getPayrollRecords(@CurrentTenant() tenantId: string) {
+    return this.hrService.getPayrollRecords(tenantId);
   }
 }

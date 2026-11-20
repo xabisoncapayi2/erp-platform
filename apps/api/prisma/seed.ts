@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import * as bcrypt from 'bcrypt'; // change to 'bcryptjs' if you went with Option B
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/erp_db?schema=public',
@@ -10,34 +9,97 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const tenant = await prisma.tenant.upsert({
-    where: { slug: 'demo-tenant' },
-    update: {},
-    create: { slug: 'demo-tenant', name: 'Demo Tenant' },
-  });
+  console.log('Seeding demo data...');
 
-  const passwordHash = await bcrypt.hash('password123', 10);
+  // Deleting tenants cascades down to all dependent records
+  await prisma.tenant.deleteMany({});
 
-  const user = await prisma.user.upsert({
-    where: { email: 'admin@demo.test' },
-    update: {},
-    create: {
-      tenantId: tenant.id,
-      email: 'admin@demo.test',
-      passwordHash,
-      roles: ['procurement:approve', 'admin'],
+  // 1. Tenant
+  const tenant = await prisma.tenant.create({
+    data: {
+      id: 'tenant-acme-sa',
+      slug: 'acme-sa',
+      name: 'Acme Enterprises South Africa',
     },
   });
 
-  console.log('Seeded tenant:', tenant.slug);
-  console.log('Seeded user:', user.email, '(password: password123)');
+  // 2. User
+  await prisma.user.create({
+    data: {
+      tenantId: tenant.id,
+      email: 'admin@acme.co.za',
+      passwordHash: '$2b$10$e8a88888888888888888888888888888888888888888888888888',
+      roles: ['ADMIN'],
+    },
+  });
+
+  // 3. Warehouse
+  const warehouse = await prisma.warehouse.create({
+    data: {
+      tenantId: tenant.id,
+      name: 'Gauteng Distribution Hub',
+    },
+  });
+
+  // 4. Product
+  const product = await prisma.product.create({
+    data: {
+      tenantId: tenant.id,
+      sku: 'VALVE-001',
+      name: 'Industrial Control Valve 50mm',
+      unitCost: new Prisma.Decimal(150.0),
+      unitPrice: new Prisma.Decimal(250.0),
+    },
+  });
+
+  // 5. Inventory Item
+  await prisma.inventoryItem.create({
+    data: {
+      tenantId: tenant.id,
+      productId: product.id,
+      warehouseId: warehouse.id,
+      quantityOnHand: 250,
+    },
+  });
+
+  // 6. Employee
+  await prisma.employee.create({
+    data: {
+      tenantId: tenant.id,
+      firstName: 'Sibusiso',
+      lastName: 'Nkosi',
+      email: 'sibusiso@acme.co.za',
+      department: 'Operations',
+      jobTitle: 'Plant Lead',
+      grossSalary: new Prisma.Decimal(48000.0),
+      salary: new Prisma.Decimal(48000.0),
+    },
+  });
+
+  // 7. General Ledger Entry
+  await prisma.generalLedgerEntry.create({
+    data: {
+      tenantId: tenant.id,
+      description: 'System Opening Balances',
+      lines: {
+        create: [
+          { accountCode: '1000', debit: new Prisma.Decimal(150000.0), credit: new Prisma.Decimal(0.0) },
+          { accountCode: '1100', debit: new Prisma.Decimal(85000.0), credit: new Prisma.Decimal(0.0) },
+          { accountCode: '3000', debit: new Prisma.Decimal(0.0), credit: new Prisma.Decimal(235000.0) },
+        ],
+      },
+    },
+  });
+
+  console.log('Demo data seeded successfully.');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('Seeding failed:', e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

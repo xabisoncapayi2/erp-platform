@@ -1,25 +1,27 @@
-import { IsString, IsOptional, IsObject } from "class-validator";
+import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
 
 export class CreateNotificationDto {
   @IsString()
-  tenantId: string;
-
   @IsOptional()
+  tenantId?: string;
+
   @IsString()
+  @IsOptional()
   userId?: string;
 
-  @IsOptional()
   @IsString()
-  title?: string;
+  @IsNotEmpty()
+  title: string;
 
   @IsString()
+  @IsNotEmpty()
   message: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   type?: string;
 
-  @IsOptional()
   @IsObject()
+  @IsOptional()
   metadata?: Record<string, any>;
 }

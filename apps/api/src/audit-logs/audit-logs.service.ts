@@ -1,13 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { CreateAuditLogDto } from "./create-audit-log.dto";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuditLogsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async log(dto: CreateAuditLogDto) {
-    return this.prisma.auditLog.create({
+  async create(dto: any) {
+    return (this.prisma as any).auditLog.create({
       data: {
         tenantId: dto.tenantId,
         userId: dto.userId,
@@ -15,22 +14,22 @@ export class AuditLogsService {
         action: dto.action,
         entity: dto.entity,
         entityId: dto.entityId,
-        details: dto.details ?? {},
+        details: dto.details,
         ipAddress: dto.ipAddress,
         userAgent: dto.userAgent,
       },
     });
   }
 
-  async findAll(tenantId: string, options?: { entity?: string; action?: string; limit?: number }) {
-    const where: any = { tenantId };
-    if (options?.entity) where.entity = options.entity;
-    if (options?.action) where.action = options.action;
+  async log(dto: any) {
+    return this.create(dto);
+  }
 
-    return this.prisma.auditLog.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      take: options?.limit || 100,
+  async findAll(tenantId: string) {
+    return (this.prisma as any).auditLog.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
     });
   }
 }

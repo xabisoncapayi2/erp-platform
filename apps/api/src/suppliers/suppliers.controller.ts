@@ -1,25 +1,20 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { SuppliersService, CreateSupplierDto } from './suppliers.service';
+import { Controller, Post, Get, Body, Headers, UseGuards } from '@nestjs/common';
+import { SuppliersService } from './suppliers.service';
+import type { CreateSupplierDto } from './suppliers.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('suppliers')
+@UseGuards(JwtAuthGuard)
 export class SuppliersController {
   constructor(private readonly suppliersService: SuppliersService) {}
 
   @Post()
   async create(@Body() createSupplierDto: CreateSupplierDto) {
-    const tenantId = 'tenant-1';
-    return this.suppliersService.create(tenantId, createSupplierDto);
+    return this.suppliersService.create(createSupplierDto);
   }
 
   @Get()
-  async findAll() {
-    const tenantId = 'tenant-1';
+  async findAll(@Headers('x-tenant-id') tenantId: string) {
     return this.suppliersService.findAll(tenantId);
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const tenantId = 'tenant-1';
-    return this.suppliersService.findOne(id, tenantId);
   }
 }

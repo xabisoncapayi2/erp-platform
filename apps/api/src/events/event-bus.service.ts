@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, BadRequestException } from '@nestjs/common';
 import { Subject, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import Redis from 'ioredis';
@@ -23,9 +23,7 @@ export class EventBusService implements OnModuleInit, OnModuleDestroy {
     this.redisPublisher = new Redis({ host: redisHost, port: redisPort, lazyConnect: true });
     this.redisSubscriber = new Redis({ host: redisHost, port: redisPort, lazyConnect: true });
 
-    this.redisPublisher.connect().catch(() => {
-      // Fallback to in-memory if Redis container is offline
-    });
+    this.redisPublisher.connect().catch(() => {});
 
     this.redisSubscriber
       .connect()
@@ -49,6 +47,10 @@ export class EventBusService implements OnModuleInit, OnModuleDestroy {
   }
 
   emit(name: string, tenantId: string, payload: any) {
+    if (!tenantId) {
+      throw new BadRequestException(`EventBus cannot emit event "${name}" without a valid tenantId context.`);
+    }
+
     const event: SystemEvent = {
       name,
       tenantId,
@@ -56,10 +58,8 @@ export class EventBusService implements OnModuleInit, OnModuleDestroy {
       timestamp: new Date().toISOString(),
     };
 
-    // 1. Emit locally via RxJS
     this.subject$.next(event);
 
-    // 2. Publish globally via Redis Pub/Sub
     if (this.redisPublisher && this.redisPublisher.status === 'ready') {
       this.redisPublisher.publish('erp:system:events', JSON.stringify(event));
     }

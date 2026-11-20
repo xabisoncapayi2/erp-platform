@@ -1,36 +1,39 @@
-import { IsString, IsOptional, IsObject } from "class-validator";
+import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
 
 export class CreateAuditLogDto {
   @IsString()
-  tenantId: string;
-
   @IsOptional()
+  tenantId?: string;
+
   @IsString()
+  @IsOptional()
   userId?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   userEmail?: string;
 
   @IsString()
+  @IsNotEmpty()
   action: string;
 
   @IsString()
+  @IsNotEmpty()
   entity: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   entityId?: string;
 
-  @IsOptional()
   @IsObject()
+  @IsOptional()
   details?: Record<string, any>;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   ipAddress?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   userAgent?: string;
 }

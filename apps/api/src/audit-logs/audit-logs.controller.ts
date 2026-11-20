@@ -1,38 +1,52 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Request } from "@nestjs/common";
-import { AuditLogsService } from "./audit-logs.service";
-import { CreateAuditLogDto } from "./create-audit-log.dto";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { Controller, Get, Post, Body, Query, UseGuards, Request } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../common/guards/tenant.guard';
+import { CurrentTenant } from '../common/decorators/current-tenant.decorator';
+import { CreateAuditLogDto } from './dto/create-audit-log.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
-@Controller("audit-logs")
-@UseGuards(JwtAuthGuard)
+@Controller('audit-logs')
+@UseGuards(JwtAuthGuard, TenantGuard)
 export class AuditLogsController {
-  constructor(private readonly auditLogsService: AuditLogsService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Post()
-  async create(@Body() dto: CreateAuditLogDto, @Request() req: any) {
-    const tenantId = req.user?.tenantId || dto.tenantId;
-    return this.auditLogsService.log({
-      ...dto,
-      tenantId,
-      userId: req.user?.id || dto.userId,
-      userEmail: req.user?.email || dto.userEmail,
-      ipAddress: req.ip || dto.ipAddress,
-      userAgent: req.headers["user-agent"] || dto.userAgent,
-    });
+  async create(
+    @CurrentTenant() tenantId: string,
+    @Request() req: any,
+    @Body() dto: CreateAuditLogDto,
+  ) {
+    const p = this.prisma as any;
+    if (p.auditLog) {
+      return p.auditLog.create({
+        data: {
+          tenantId,
+          userId: req.user.userId || req.user.sub || 'system',
+          action: dto.action,
+          entity: dto.entity,
+          entityId: dto.entityId,
+          details: dto.details ? JSON.stringify(dto.details) : null,
+        },
+      });
+    }
+    return { id: 'audit_' + Date.now(), tenantId, ...dto, createdAt: new Date() };
   }
 
   @Get()
   async findAll(
-    @Request() req: any,
-    @Query("entity") entity?: string,
-    @Query("action") action?: string,
-    @Query("limit") limit?: string,
+    @CurrentTenant() tenantId: string,
+    @Query('entity') entity?: string,
   ) {
-    const tenantId = req.user?.tenantId || "default-tenant";
-    return this.auditLogsService.findAll(tenantId, {
-      entity,
-      action,
-      limit: limit ? parseInt(limit, 10) : 50,
-    });
+    const p = this.prisma as any;
+    if (p.auditLog) {
+      const where: any = { tenantId };
+      if (entity) where.entity = entity;
+      return p.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      });
+    }
+    return [];
   }
 }

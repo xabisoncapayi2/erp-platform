@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GeneralLedgerService } from '../general-ledger/general-ledger.service';
-import { SalesOrderStatus } from '@prisma/client';
+import { SalesOrderStatus, MovementReason } from '@prisma/client';
 
 export interface SalesOrderLineDto {
   productId: string;
@@ -89,10 +89,22 @@ export class SalesOrdersService {
         const unitCost = Number(inventory.product?.unitCost || line.product?.unitCost || 0);
         totalCost += qty * unitCost;
 
+        // Decrement inventory stock
         await tx.inventoryItem.update({
           where: { id: inventory.id },
           data: {
             quantityOnHand: { decrement: qty },
+          },
+        });
+
+        // Record InventoryMovement for full audit traceability
+        await tx.inventoryMovement.create({
+          data: {
+            tenantId,
+            inventoryItemId: inventory.id,
+            quantityChange: -qty,
+            reason: MovementReason.SALE,
+            referenceId: order.id,
           },
         });
       }

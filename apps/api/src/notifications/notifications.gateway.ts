@@ -3,72 +3,73 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
-} from "@nestjs/websockets";
-import { Server, Socket } from "socket.io";
-import { Injectable, OnModuleInit, Logger } from "@nestjs/common";
-import { EventBusService } from "../events/event-bus.service";
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { Logger, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
-@WebSocketGateway({
-  cors: {
-    origin: "*",
-  },
-  namespace: "/ws/notifications",
-})
 @Injectable()
-export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
+@WebSocketGateway({
+  cors: { origin: '*' },
+  namespace: '/ws/notifications',
+})
+export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(NotificationsGateway.name);
 
-  constructor(private readonly eventBus: EventBusService) {}
-
-  onModuleInit() {
-    // Bridge internal RxJS EventBus events to WebSocket clients
-    this.eventBus.ofType().subscribe((evt) => {
-      const tenantRoom = `tenant:${evt.tenantId}`;
-
-      // Broadcast to tenant room
-      this.server.to(tenantRoom).emit("system_event", evt);
-      this.server.to(tenantRoom).emit(evt.name, evt.payload);
-
-      // Target specific user if userId is specified in payload
-      if (evt.payload && evt.payload.userId) {
-        const userRoom = `user:${evt.payload.userId}`;
-        this.server.to(userRoom).emit("user_notification", evt);
-      }
-
-      this.logger.log(`[WS Broadcast] Event: ${evt.name} -> Room: ${tenantRoom}`);
-    });
-  }
+  constructor(private readonly jwtService: JwtService) {}
 
   handleConnection(client: Socket) {
-    const tenantId = (client.handshake.query.tenantId as string) || "default-tenant";
-    const userId = (client.handshake.query.userId as string) || "system";
+    const token =
+      client.handshake.auth?.token ||
+      client.handshake.headers?.authorization?.replace('Bearer ', '') ||
+      client.handshake.query?.token;
 
-    client.join(`tenant:${tenantId}`);
-    client.join(`user:${userId}`);
+    if (!token || typeof token !== 'string') {
+      this.logger.warn(`[WS] Rejected connection with no token: ${client.id}`);
+      client.disconnect(true);
+      return;
+    }
 
-    this.logger.log(`[WS Client Connected] ID: ${client.id} (Tenant: ${tenantId}, User: ${userId})`);
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET || 'dev-only-change-me',
+      });
 
-    client.emit("connected", {
-      status: "online",
-      socketId: client.id,
-      tenantId,
-      userId,
-      timestamp: new Date().toISOString(),
-    });
+      client.data.tenantId = payload.tenantId;
+      client.data.userId = payload.sub || payload.userId;
+
+      client.join(`tenant:${payload.tenantId}`);
+      client.join(`user:${client.data.userId}`);
+
+      this.logger.log(
+        `[WS Connected] ID: ${client.id} (Tenant: ${payload.tenantId}, User: ${client.data.userId})`,
+      );
+
+      client.emit('connected', {
+        status: 'online',
+        socketId: client.id,
+        tenantId: payload.tenantId,
+        userId: client.data.userId,
+        timestamp: new Date().toISOString(),
+      });
+    } catch {
+      this.logger.warn(`[WS] Rejected connection with invalid token: ${client.id}`);
+      client.disconnect(true);
+    }
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`[WS Client Disconnected] ID: ${client.id}`);
+    this.logger.log(`[WS Disconnected] ID: ${client.id}`);
   }
 
-  @SubscribeMessage("ping")
-  handlePing(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
-    return { event: "pong", data: { ...data, serverTime: new Date().toISOString() } };
+  sendToTenant(tenantId: string, event: string, data: any) {
+    this.server.to(`tenant:${tenantId}`).emit(event, data);
+  }
+
+  sendToUser(userId: string, event: string, data: any) {
+    this.server.to(`user:${userId}`).emit(event, data);
   }
 }

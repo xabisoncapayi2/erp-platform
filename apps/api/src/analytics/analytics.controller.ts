@@ -1,34 +1,37 @@
-import { Controller, Get, Query, Headers } from "@nestjs/common";
-import { AnalyticsService } from "./analytics.service";
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { AnalyticsService } from './analytics.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 
-@Controller("analytics")
+@Controller('analytics')
+@UseGuards(JwtAuthGuard)
 export class AnalyticsController {
   constructor(private readonly service: AnalyticsService) {}
 
-  @Get("getDashboardMetrics")
-  async getDashboardMetrics(@Headers("x-tenant-id") tenantHeader?: string) {
-    return this.service.getDashboardMetrics(tenantHeader || "default-tenant");
+  @Get('getDashboardMetrics')
+  async getDashboardMetrics(@CurrentTenant() tenantId: string) {
+    return this.service.getDashboardMetrics(tenantId);
   }
 
-  @Get("getMonthlySales")
+  @Get('getMonthlySales')
   async getMonthlySales(
-    @Headers("x-tenant-id") tenantHeader?: string,
-    @Query("year") year?: string,
-    @Query("month") month?: string,
+    @CurrentTenant() tenantId: string,
+    @Query('year') year?: number,
+    @Query('month') month?: number,
   ) {
-    return this.service.getMonthlySales(tenantHeader || "default-tenant", year, month);
+    return this.service.getMonthlySales(tenantId, year, month);
   }
 
-  @Get("getTopSellingProducts")
+  @Get('getTopSellingProducts')
   async getTopSellingProducts(
-    @Headers("x-tenant-id") tenantHeader?: string,
-    @Query("limit") limit?: string,
+    @CurrentTenant() tenantId: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.service.getTopSellingProducts(tenantHeader || "default-tenant", limit ? Number(limit) : 5);
+    return this.service.getTopSellingProducts(tenantId, limit ? Number(limit) : 5);
   }
 
-  @Get("getInventoryValuationByWarehouse")
-  async getInventoryValuationByWarehouse(@Headers("x-tenant-id") tenantHeader?: string) {
-    return this.service.getInventoryValuationByWarehouse(tenantHeader || "default-tenant");
+  @Get('getInventoryValuationByWarehouse')
+  async getInventoryValuationByWarehouse(@CurrentTenant() tenantId: string) {
+    return this.service.getInventoryValuationByWarehouse(tenantId);
   }
 }

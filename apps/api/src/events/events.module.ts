@@ -1,9 +1,15 @@
-import { Global, Module } from "@nestjs/common";
-import { EventBusService } from "./event-bus.service";
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { EventsGateway } from './events.gateway';
 
-@Global()
 @Module({
-  providers: [EventBusService],
-  exports: [EventBusService],
+  imports: [
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'secret',
+      signOptions: { expiresIn: '1d' },
+    }),
+  ],
+  providers: [EventsGateway],
+  exports: [EventsGateway],
 })
 export class EventsModule {}
