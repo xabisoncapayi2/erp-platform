@@ -28,7 +28,7 @@ async function main() {
     data: {
       tenantId: tenant.id,
       email: 'admin@acme.co.za',
-      passwordHash: '$2b$10$e8a88888888888888888888888888888888888888888888888888',
+      passwordHash: '$2b$10$5bGQjix47oSx2AP7T0OVze8znI.ACPIw4NPOhQKToRdkj.XN4fJ4q',
       roles: ['ADMIN'],
     },
   });

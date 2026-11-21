@@ -1,98 +1,115 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Multi-Tenant Enterprise Resource Planning (ERP) Platform
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+![Build & Typecheck](https://github.com/xabisoncapayi2/erp-platform/actions/workflows/ci.yml/badge.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
+![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
+![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A full-stack, multi-tenant ERP platform engineered with **Next.js 14**, **NestJS**, **Prisma ORM**, and **PostgreSQL**, backed by **Redis** and **RabbitMQ** via Docker Compose. Built to model real-world enterprise operations across finance, inventory, procurement, sales, and human resources.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Key Architectural Highlights
 
-## Project setup
+- **Multi-Tenant Data Isolation:** Scopes users, inventory, accounting entries, and HR records by `tenantId` with JWT-based authentication and role claims.
+- **15+ Integrated Domain Modules:** Covers Products, Multi-Warehouse Inventory & Stock Transfers, Suppliers, Purchase Orders, Sales Orders, Supplier Invoices, Double-Entry General Ledger (Trial Balance), Payroll & HR, Approvals, Audit Logs, and Analytics.
+- **Event-Driven & Real-Time Ready:** Uses RabbitMQ for asynchronous messaging, Redis for caching, and WebSocket gateways for live workspace notifications.
+- **End-to-End Type Safety:** Shared TypeScript workflows across the React/Next.js frontend and modular NestJS REST API.
 
-```bash
-$ npm install
+---
+
+## System Architecture
+
+```mermaid
+flowchart LR
+    Client["Next.js 14 Frontend<br/>(Port 3000)"] -->|REST + JWT Bearer| API["NestJS Modular API<br/>(Port 3001)"]
+    Client <-->|WebSockets| API
+    API -->|Prisma ORM| DB[("PostgreSQL 15<br/>(Port 5432)")]
+    API --> Redis[("Redis 7<br/>(Port 6379)")]
+    API --> MQ["RabbitMQ<br/>(Port 5672)"]
 ```
 
-## Compile and run the project
+---
 
+## Screenshots
+
+| Authentication | Executive Dashboard |
+| :---: | :---: |
+| ![Login](docs/screenshots/01-login.png) | ![Dashboard](docs/screenshots/02-dashboard.png) |
+
+| Inventory & Products | General Ledger |
+| :---: | :---: |
+| ![Inventory](docs/screenshots/03-inventory.png) | ![General Ledger](docs/screenshots/04-ledger.png) |
+
+---
+
+## Local Setup & Quick Start
+
+### Prerequisites
+- Node.js 20+
+- Docker & Docker Compose
+
+### 1. Start Infrastructure (PostgreSQL, Redis, RabbitMQ)
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker compose up -d
 ```
 
-## Run tests
-
+### 2. Configure Environment Variables
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 3. Initialize Database & Start the NestJS API
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cd apps/api
+npm install
+npx prisma db push
+npx prisma db seed
+npm run start:dev
 ```
+The API will be available at `http://localhost:3001`.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 4. Start the Next.js Frontend
+In a second terminal:
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+Open `http://localhost:3000/login` in your browser.
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## Demo Credentials
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The database seed script creates a pre-populated South African demo tenant (**Acme SA**) with sample products, inventory, ledger accounts, and employees:
 
-## Support
+| Field | Value |
+| :--- | :--- |
+| **Tenant ID** | `tenant-acme-sa` |
+| **Email** | `admin@acme.co.za` |
+| **Password** | `password123` |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## Core API Modules
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Module | Base Route | Responsibility |
+| :--- | :--- | :--- |
+| **Auth** | `/auth` | Credential validation & JWT issuance |
+| **Analytics** | `/analytics` | KPIs, monthly sales, top products & warehouse valuation |
+| **Products & Inventory** | `/products`, `/inventory`, `/stock-transfers` | Catalog management, stock levels & inter-warehouse transfers |
+| **Procurement & Sales** | `/suppliers`, `/purchase-orders`, `/sales-orders` | Vendor management & order lifecycle |
+| **Finance** | `/general-ledger`, `/supplier-invoices` | Double-entry journal postings, trial balance & AP invoices |
+| **HR & Payroll** | `/hr` | Employee directory & payroll processing |
+| **Governance** | `/approvals`, `/audit-logs`, `/notifications` | Workflow approvals, audit trails & real-time alerts |
+
+---
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Distributed under the [MIT License](LICENSE).

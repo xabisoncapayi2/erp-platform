@@ -4,11 +4,12 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Lock, Mail, Building, AlertCircle } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@company.com');
+  const [email, setEmail] = useState('admin@acme.co.za');
   const [password, setPassword] = useState('password123');
-  const [tenantId, setTenantId] = useState('tenant_alpha');
+  const [tenantId, setTenantId] = useState('tenant-acme-sa');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,23 +22,22 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      // Create a valid mock JWT token for dev/testing
-      const payload = {
-        userId: 'user_123',
-        email: email || 'admin@company.com',
-        tenantId: tenantId || 'tenant_alpha',
-        role: 'ADMIN',
-        exp: Math.floor(Date.now() / 1000) + 86400 * 7, // Valid for 7 days
-      };
+      // Matches AuthController @Post('login') which expects { email, password }
+      const response = await apiClient.post('/auth/login', {
+        email,
+        password,
+      });
 
-      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-      const encodedPayload = btoa(JSON.stringify(payload));
-      const mockToken = `${header}.${encodedPayload}.mock_signature`;
+      const token = response.data?.accessToken || response.data?.access_token || response.data?.token;
 
-      login(mockToken);
+      if (!token) {
+        throw new Error('No token returned from server');
+      }
+
+      login(token);
       router.push('/dashboard');
     } catch (err: any) {
-      setError('Authentication failed');
+      setError(err.response?.data?.message || 'Invalid credentials or server unreachable');
     } finally {
       setIsSubmitting(false);
     }
@@ -61,16 +61,15 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
-              Tenant ID
+              Tenant ID (Optional)
             </label>
             <div className="relative">
               <Building className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
               <input
                 type="text"
-                required
                 value={tenantId}
                 onChange={(e) => setTenantId(e.target.value)}
-                placeholder="e.g. tenant_alpha"
+                placeholder="e.g. tenant-acme-sa"
                 className="w-full rounded-lg bg-slate-900 border border-slate-700 py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -115,7 +114,7 @@ export default function LoginPage() {
             disabled={isSubmitting}
             className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 transition-colors disabled:opacity-50"
           >
-            {isSubmitting ? 'Authenticating...' : 'Sign In (Dev Mode)'}
+            {isSubmitting ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
       </div>

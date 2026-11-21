@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api-client';
 import { Building, Mail, Lock, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function CustomerLoginPage() {
-  const [tenantId, setTenantId] = useState('tenant_alpha');
+  const [tenantId, setTenantId] = useState('tenant-acme-sa');
   const [email, setEmail] = useState('client@acme.com');
   const [password, setPassword] = useState('password123');
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +89,7 @@ export default function CustomerLoginPage() {
                 required
                 value={tenantId}
                 onChange={(e) => setTenantId(e.target.value)}
-                placeholder="e.g. tenant_alpha"
+                placeholder="e.g. tenant-acme-sa"
                 className="w-full rounded-lg bg-slate-950 border border-slate-800 py-2 pl-9 pr-4 text-xs text-white placeholder-slate-600 focus:border-blue-500 focus:outline-none"
               />
             </div>

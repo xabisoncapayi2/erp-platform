@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       try {
-        const decoded = jwtDecode<JwtPayload>(storedToken);
+        const raw: any = jwtDecode(storedToken); const decoded: JwtPayload = { ...raw, userId: raw.userId || raw.sub, role: raw.role || raw.roles?.[0] };
         if (decoded.exp * 1000 > Date.now()) {
           setToken(storedToken);
           setUser(decoded);
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (newToken: string) => {
     try {
-      const decoded = jwtDecode<JwtPayload>(newToken);
+      const raw: any = jwtDecode(newToken); const decoded: JwtPayload = { ...raw, userId: raw.userId || raw.sub, role: raw.role || raw.roles?.[0] };
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(decoded);
