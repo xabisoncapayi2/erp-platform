@@ -1,1 +1,41 @@
+name: Build & Typecheck
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-api:
+    name: Build NestJS API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - env:
+          DATABASE_URL: postgresql://postgres:postgres_password@localhost:5432/erp_platform?schema=public
+        run: npx prisma generate
+      - run: npm run build
+
+  build-web:
+    name: Build Next.js Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+        run: npm run build
