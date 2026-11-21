@@ -37,7 +37,7 @@ export interface ExtendedProduct {
   status: 'ACTIVE' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 }
 
-export const INITIAL_PRODUCTS: ExtendedProduct[] = [
+const INITIAL_PRODUCTS: ExtendedProduct[] = [
   {
     id: 'prod_101',
     asin: 'B08N5WRWNW',
