@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { erpEngine } from '@/lib/erp-engine';
-import { INITIAL_PRODUCTS, ExtendedProduct } from '@/app/dashboard/products/page';
+import type { ExtendedProduct } from '@/app/dashboard/products/page';
+import { INITIAL_PRODUCTS } from '@/lib/initial-products';
 import {
   ShoppingCart,
   CheckCircle2,

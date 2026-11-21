@@ -1,5 +1,6 @@
 'use client';
 
+import { INITIAL_PRODUCTS } from '@/lib/initial-products';
 import React, { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { erpEngine } from '@/lib/erp-engine';
@@ -37,110 +38,7 @@ export interface ExtendedProduct {
   status: 'ACTIVE' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 }
 
-const INITIAL_PRODUCTS: ExtendedProduct[] = [
-  {
-    id: 'prod_101',
-    asin: 'B08N5WRWNW',
-    sku: 'HW-SRV-2U-BLD',
-    name: 'Enterprise Cloud Server Rack 2U (64-Core AMD EPYC)',
-    description: 'Pre-configured high density server for local cloud AI & database execution.',
-    category: 'Hardware & Infrastructure',
-    price: 4899.00,
-    costPrice: 2800.00,
-    allocatedBudget: 50000.00,
-    spentBudget: 33600.00,
-    stockQuantity: 18,
-    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80',
-    rating: 4.9,
-    reviewsCount: 128,
-    status: 'ACTIVE',
-  },
-  {
-    id: 'prod_102',
-    asin: 'B09V3KXJPB',
-    sku: 'HW-WRK-ULTRA',
-    name: 'Developer Workstation Station Ultra i9 / 128GB RAM',
-    description: 'Engineered for CAD design, local compile pipelines, and deep learning models.',
-    category: 'Hardware & Infrastructure',
-    price: 3299.00,
-    costPrice: 1950.00,
-    allocatedBudget: 35000.00,
-    spentBudget: 23400.00,
-    stockQuantity: 12,
-    imageUrl: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&q=80',
-    rating: 4.8,
-    reviewsCount: 94,
-    status: 'ACTIVE',
-  },
-  {
-    id: 'prod_103',
-    asin: 'B07XJW8123',
-    sku: 'SW-ERP-ENTERPRISE',
-    name: 'ERP SaaS Enterprise Workspace (1-Year Core License)',
-    description: 'Full workspace access with high-availability cluster SLA and 24/7 engineering support.',
-    category: 'Software & Licenses',
-    price: 8999.00,
-    costPrice: 1200.00,
-    allocatedBudget: 20000.00,
-    spentBudget: 4800.00,
-    stockQuantity: 999,
-    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
-    rating: 5.0,
-    reviewsCount: 312,
-    status: 'ACTIVE',
-  },
-  {
-    id: 'prod_104',
-    asin: 'B0B8QX2911',
-    sku: 'IOT-SENS-IND',
-    name: 'Industrial IoT Sensor Pack (Telemetry & Vibration)',
-    description: 'Wireless Zigbee/LoRaWAN factory floor metrics telemetry sensor kit.',
-    category: 'IoT & Automation',
-    price: 850.00,
-    costPrice: 410.00,
-    allocatedBudget: 15000.00,
-    spentBudget: 9840.00,
-    stockQuantity: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80',
-    rating: 4.6,
-    reviewsCount: 42,
-    status: 'LOW_STOCK',
-  },
-  {
-    id: 'prod_105',
-    asin: 'B08L5WH39K',
-    sku: 'LOG-SCN-WIRELESS',
-    name: 'Ruggedized Warehouse Barcode Scanner 2D',
-    description: 'IP67 rated logistics handheld scanner with direct ERP SAP/NetSuite sync API.',
-    category: 'Logistics Hardware',
-    price: 450.00,
-    costPrice: 210.00,
-    allocatedBudget: 12000.00,
-    spentBudget: 7350.00,
-    stockQuantity: 35,
-    imageUrl: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?auto=format&fit=crop&w=600&q=80',
-    rating: 4.7,
-    reviewsCount: 88,
-    status: 'ACTIVE',
-  },
-  {
-    id: 'prod_106',
-    asin: 'B09G9FPHP6',
-    sku: 'SVC-ARCH-100H',
-    name: 'ERP Onsite Architecture Consulting (100-Hour Block)',
-    description: 'Dedicated enterprise solutions engineers for custom DB migration and integration.',
-    category: 'Professional Services',
-    price: 12500.00,
-    costPrice: 5000.00,
-    allocatedBudget: 40000.00,
-    spentBudget: 15000.00,
-    stockQuantity: 20,
-    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
-    rating: 4.9,
-    reviewsCount: 19,
-    status: 'ACTIVE',
-  },
-];
+
 
 export default function AdminProductsPage() {
   const { tenantId } = useAuth();
