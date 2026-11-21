@@ -71,7 +71,7 @@ npx prisma db push
 npx prisma db seed
 npm run start:dev
 ```
-The API will be available at `http://localhost:3001`.
+The API will be available at `http://localhost:3001` (Interactive Swagger OpenAPI docs at `http://localhost:3001/api/docs`)`.
 
 ### 4. Start the Next.js Frontend
 In a second terminal:
